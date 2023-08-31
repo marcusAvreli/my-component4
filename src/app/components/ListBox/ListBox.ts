@@ -1,25 +1,32 @@
 //import {Color} from '../../common/ui/Color'
 import {Control} from '../Control'
-/*import {FormatItemEventArgs} from './../FormatItemEventArgs'
-import {asCollectionView} from "../../util/asserts/asCollectionView";
-import {asFunction} from "../../util/asserts/asFunction";
+/*import {FormatItemEventArgs} from './../FormatItemEventArgs'*/
+import {asCollectionView} from "../../core/util/asserts/asCollectionView";
+//import {assert, asCollectionView} from "../../core/index";
+/*import {asFunction} from "../../util/asserts/asFunction";
 import {asString} from "../../util/asserts/asString";
-import {hasItems} from "../../common/Global";
-import {asNumber} from "../../util/asserts/asNumber";
-import {toggleClass} from "../../util/dom/toggleClass";
+*/
+import {hasItems} from "../../core/common/global";
+import {asNumber} from "../../core/util/asserts/asNumber";
+/*import {toggleClass} from "../../util/dom/toggleClass";
 import {contains} from "../../util/dom/contains";
 import {isObject} from "../../util/isObject";
 import {asArray} from "../../util/asserts/asArray";
+*/
 import {EventArgs} from "../../eventArgs/EventArgs";
-import {escapeHtml} from "../../util/escapeHtml";
-import {hasClass} from "../../util/dom/hasClass";
+/*import {escapeHtml} from "../../util/escapeHtml";
+*/
+import {hasClass} from "../../core/util/dom/has-class";
+/*
 import {Key} from "../../enum/Key";
 import {tryCast} from "../../common/Global";
+*/
 import {Event} from "../../event/Event";
-import {asBoolean} from "../../util/asserts/asBoolean";
 
-import {ICollectionView} from "../../interface/collections/ICollectionView";
-import {IEditableCollectionView} from "../../interface/collections/IEditableCollectionView";
+import {asBoolean} from "../../core/util/asserts/asBoolean";
+
+import {ICollectionView} from "../../collections/interface/ICollectionView";
+/*import {IEditableCollectionView} from "../../interface/collections/IEditableCollectionView";
 import {NotifyCollectionChangedEventArgs} from "../../core/collections/eventArgs/NotifyCollectionChangedEventArgs";
 */
 
@@ -48,7 +55,7 @@ export class ListBox extends Control {
 
 	// property storage
 	_items: any; // any[] or ICollectionView
-	//_cv: ICollectionView;
+	_cv: ICollectionView;
 	//_itemFormatter: Function;
 	_pathDisplay: string;
 	_pathValue: string;
@@ -96,8 +103,10 @@ export class ListBox extends Control {
 			console.log("setting_items");
 			// save new data source and collection view
 			this._items = value;
-			//this._cv = asCollectionView(value);
-
+			this._cv = asCollectionView(value);
+			console.log("=================================");
+			console.log("this:"+JSON.stringify(this._items));
+			console.log("=================================");
 			// bind new collection view
 			/*
 			if (this._cv != null) {
@@ -130,23 +139,26 @@ console.log("populate_list_started");
 		//	this.onLoadingItems();
 
 			// populate
-			//host.innerHTML = '';
-			/*
+			host.innerHTML = '';
+			
 			if (this._cv) {
+				console.log("inside_cv:"+this._cv.items);
 				for (let i = 0; i < this._cv.items.length; i++) {
 
 					// get item text
 					let text = this.getDisplayValue(i);
+					console.log("inside_cv:"+text);
 					if (this._html != true) {
-						text = escapeHtml(text);
+						//text = escapeHtml(text);
 					}
 
 					// add checkbox (without tabindex attribute: TFS 135857)
+					/*
 					if (this.checkedMemberPath) {
 						const checked = this._cv.items[i][this.checkedMemberPath];
 						text          = '<label><input type="checkbox"' + (checked ? ' checked' : '') + '> ' + text + '</label>';
 					}
-
+*/
 					// build item
 					const item = document.createElement('div');
 					item.innerHTML = text;
@@ -156,19 +168,23 @@ console.log("populate_list_started");
 					}
 
 					// allow custom formatting
+					/*
 					if (this.formatItem.hasHandlers) {
 						const e = new FormatItemEventArgs(i, this._cv.items[i], item);
 						this.onFormatItem(e);
 					}
-
-					// add item to list
+*/
+					console.log(" add item to list");
+					
 					host.appendChild(item);
 				}
+				
 			}
-*/
+
 			// make sure the list is not totally empty
 			// or min-height/max-height won't work properly in IE/Edge
 			if (host.children.length == 0) {
+				console.log("host_create_element");
 				host.appendChild(document.createElement('div'));
 			}
 
@@ -188,5 +204,123 @@ console.log("populate_list_started");
 		console.log("populate_list_finished");
 		
 	}
+/**
+	 * Gets the string displayed for the item at a given index.
+	 *
+	 * The string may be plain text or HTML, depending on the setting
+	 * of the @see:isContentHtml property.
+	 *
+	 * @param index The index of the item.
+	 */
+	getDisplayValue(index: number): string {
 
+		// get the text or html
+		let item = null;
+		if (index > -1 && hasItems(this._cv)) {
+			item = this._cv.items[index];
+			
+			/*
+			if (this.displayMemberPath) {
+				item = item[this.displayMemberPath];
+			}*/
+		}
+		let text = item != null ? item.toString() : '';
+console.log("text:"+text);
+		// allow caller to override/modify the text or html
+		/*
+		if (this.itemFormatter) {
+			text = this.itemFormatter(index, text);
+		}
+*/
+		// return the result
+		return text;
+	}
+	get itemFormatter(): Function {
+		return null;
+	}
+	set itemFormatter(value: Function) {
+	/*
+		if (value != this._itemFormatter) {
+			this._itemFormatter = asFunction(value);
+			this._populateList();
+		}
+		*/
+	}
+	/**
+	 * Gets or sets the name of the property to use as the visual representation of the items.
+	 */
+	get displayMemberPath(): string {
+		return this._pathDisplay;
+	}
+	set displayMemberPath(value: string) {
+	/*
+		if (value != this._pathDisplay) {
+			this._pathDisplay = asString(value);
+			this._populateList();
+		}*/
+	}
+	
+	////////////////////////////////////////////////////////////
+//
+//after drop down was shown on screen
+//
+/////////////////////////////////////////////////////////////
+	
+	
+		/**
+	 * Gets or sets the maximum height of the list.
+	 */
+	get maxHeight(): number {
+		const host = this.hostElement;
+		return host ? parseFloat(host.style.maxHeight) : null;
+	}
+	set maxHeight(value: number) {
+		const host = this.hostElement;
+		if (host) {
+			host.style.maxHeight = asNumber(value) + 'px';
+		}
+	}
+	
+		/**
+	 * Occurs when the value of the @see:selectedIndex property changes.
+	 */
+	selectedIndexChanged = new Event();
+	/**
+	 * Raises the @see:selectedIndexChanged event.
+	 */
+	onSelectedIndexChanged(e?: EventArgs) {
+		this.selectedIndexChanged.raise(this, e);
+	}
+	
+	get selectedIndex(): number {
+		return this._cv ? this._cv.currentPosition : -1;
+	}
+	set selectedIndex(value: number) {
+		if (this._cv) {
+			this._cv.moveCurrentToPosition(asNumber(value));
+		}
+	}
+	/**
+	 * Gets the @see:ICollectionView object used as the item source.
+	 */
+	get collectionView(): ICollectionView {
+		return this._cv;
+	}
+	
+		get isContentHtml(): boolean {
+		return this._html;
+	}
+	set isContentHtml(value: boolean) {
+		if (value != this._html) {
+			this._html = asBoolean(value);
+			this._populateList();
+		}
+	}
+		getDisplayText(index: number): string {
+		const children = this.hostElement.children,
+              item     = index > -1 && index < children.length
+                  ? <HTMLElement>children[index]
+                  : null;
+		return item != null ? item.textContent : '';
+	}
 }

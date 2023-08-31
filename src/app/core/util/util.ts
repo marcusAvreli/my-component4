@@ -1,11 +1,21 @@
 export {copy} from "./copy";
+//dom
+
 export {getElement} from "./dom/get-element";
 export {createElement} from "./dom/create-element";
 export {addClass} from "./dom/add-class";
+export {enable} from "./dom/enable";
+export {toggleClass} from "./dom/toggle-class";
+export {removeClass} from "./dom/remove-class";
 export {contains} from "./dom/contains";
 //asserts
 export {assert} from "./asserts/assert";
 export {asType} from "./asserts/asType";
+export {asFunction} from "./asserts/asFunction";
+export {asArray} from "./asserts/asArray";
+export {asBoolean} from "./asserts/asBoolean";
+export {asCollectionView} from "./asserts/asCollectionView";
+export {asNumber} from "./asserts/asNumber";
 
 //lang
 export {isFunction} from "./lang/is-function";

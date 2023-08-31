@@ -1,13 +1,12 @@
-//import  * as metadata from 'reflect-metadata';
-//import {reflector}  from 'angular/core';
-//import { reflector } from 'angular2/core';
 import {
    asType,
    contains,
     getElement,
 	addClass,
 	createElement,
-	copy
+	copy,
+	enable,
+	asBoolean
    
 } from "../core/index";
 
@@ -25,7 +24,7 @@ export class Control {
     private _toInv: number;                     // invalidation timeOut
    private _orgOuter: string;                  // host element's original outerHTML
     private _orgInner: string;                  // host element's original innerHTML
-
+    private _listeners;                         // list of event listeners attached to this control
     /**
      * Initializes a new instance of a @see:Control and attaches it to a DOM element.
      *
@@ -201,7 +200,7 @@ export class Control {
         }
     }
 	invalidate(fullUpdate = true) {
-	console.log("hello");
+	console.log("=================hello=================");
         /*this._fullUpdate = this._fullUpdate || fullUpdate;
         if (this._toInv) {
             clearTimeout(this._toInv);
@@ -216,7 +215,7 @@ export class Control {
     }
 	
 	  containsFocus(): boolean {
-
+	console.log("contains_focus===========");
         // test for disposed controls
         if (!this._e) {
             return false;
@@ -227,13 +226,15 @@ export class Control {
         for (let i = 0; i < c.length; i++) {
             const ctl = Control.getControl(c[i]);
             if (ctl && ctl != this && ctl.containsFocus()) {
+				console.log("returning_true_0");
                 return true;
             }
         }
 
         // check for actual HTML containment
         //return contains(this._e, <HTMLElement>document.activeElement);
-		return true;
+		console.log("returning_true_1");
+		return false;
     }
 	 /**
      * Gets the control that is hosted in a given DOM element.
@@ -244,4 +245,34 @@ export class Control {
         const e = getElement(element);
         return e ? asType(e[Control._DATA_KEY], Control, true) : null;
     }
+	
+	////////////////////////////////////////////////////////////
+//
+//after drop down was shown on screen
+//
+/////////////////////////////////////////////////////////////
+	
+	get disabled(): boolean {
+        return this._e && this._e.getAttribute('disabled') != null;
+    }
+    set disabled(value: boolean) {
+        value = asBoolean(value, true);
+        if (value != this.disabled) {
+            enable(this._e, !value);
+        }
+    }
+	
+	 get isTouching(): boolean {
+        return Control._touching;
+    }
+	
+	    addEventListener(target: EventTarget, type: string, fn: any, capture = false) {
+            if (target) {
+                target.addEventListener(type, fn, capture);
+                if (this._listeners == null) {
+                    this._listeners = [];
+                }
+                this._listeners.push({ target: target, type: type, fn: fn, capture: capture });
+            }
+        }
    }

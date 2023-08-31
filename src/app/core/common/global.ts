@@ -1,8 +1,8 @@
 //import {Binding} from "./Binding";
 //import {Rectangle} from "./ui/Rectangle";
-import {isFunction, isString,     } from "../core/util/util";
+import {isFunction, isString,     } from "../util/util";
 //import {Aggregate} from "../../../enum/Aggregate";
-//import {ICollectionView} from "../../../collections/interface/ICollectionView";
+import {ICollectionView} from "../../collections/interface/ICollectionView";
 
 
 
@@ -50,11 +50,11 @@ export function tryCast(value: any, type: any): any {
  *
  * @param value @see:ICollectionView to check.
  */
- /*
+ 
 export function hasItems(value: ICollectionView) {
     return value && value.items && value.items.length;
 }
-*/
+
 
 
 

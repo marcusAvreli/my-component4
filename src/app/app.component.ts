@@ -36,7 +36,7 @@ export class AppComponent implements AfterViewInit{
 		
 		const combobox = new ComboBox(this.input.nativeElement);
 		
-		combobox.itemsSource = ['value1', 'value2', 'value3'];
+		combobox.itemsSource = ['value1from component', 'value2', 'value3'];
 	//	this.renderer.selectRootElement(this.input["nativeElement"]).focus();
 		
 		}
