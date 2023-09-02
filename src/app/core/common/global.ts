@@ -1,6 +1,7 @@
 //import {Binding} from "./Binding";
 //import {Rectangle} from "./ui/Rectangle";
-import {isFunction, isString,     } from "../util/util";
+//import {isFunction, isString,     } from "../util/util";
+import {isFunction, isString, asType, contains, asNumber, isBoolean, isNumber} from "../util/util";
 //import {Aggregate} from "../../../enum/Aggregate";
 import {ICollectionView} from "../../collections/interface/ICollectionView";
 
@@ -19,7 +20,19 @@ export interface IQueryInterface {
      
     implementsInterface(interfaceName: string): boolean;
 }
+
+
 */
+export function setSelectionRange(e: HTMLInputElement, start: number, end = start) {
+    e = asType(e, HTMLInputElement);
+    if (contains(document.body, e) && !e.disabled && e.style.display != 'none') {
+        try {
+            e.setSelectionRange(asNumber(start), asNumber(end));
+            e.focus(); // needed in Chrome (TFS 124102)
+        } catch (x) { }
+    }
+}
+
 /**
  * Casts a value to a type if possible.
  *

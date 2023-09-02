@@ -1,6 +1,8 @@
 import {Component, NgModule, VERSION, Inject,Renderer2,ElementRef,ViewChild,  ComponentFactoryResolver, Injector,AfterViewInit} from '@angular/core'
 import { DropDown } from './components/DropDown';
 import {ComboBox} from './components/ComboBox';
+import {AutoComplete} from './components/AutoComplete/AutoComplete';
+import {MultiSelect} from './components/MultiSelect/MultiSelect';
 @Component({
   selector: 'app-root',
   template: `
@@ -33,10 +35,21 @@ export class AppComponent implements AfterViewInit{
 		//this.combobox = new ComboBox(this.input.nativeElement);
 		
 		//this.combobox.itemsSource = ['value1', 'value2', 'value3'];
-		
+		/*
 		const combobox = new ComboBox(this.input.nativeElement);
 		
-		combobox.itemsSource = ['value1from component', 'value2', 'value3'];
+		combobox.itemsSource = ['russia', 'israel', 'usa','trace'];
+		
+		*/
+	/*
+		const combobox2 = new AutoComplete(this.input.nativeElement);
+		
+		combobox2.itemsSource = ['russia', 'israel', 'usa','trace'];
+		
+		*/
+const combobox3 = new MultiSelect(this.input.nativeElement);
+		
+		combobox3.itemsSource = ['russia', 'israel', 'usa','trace'];
 	//	this.renderer.selectRootElement(this.input["nativeElement"]).focus();
 		
 		}

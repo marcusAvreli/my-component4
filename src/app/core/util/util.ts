@@ -16,6 +16,8 @@ export {asArray} from "./asserts/asArray";
 export {asBoolean} from "./asserts/asBoolean";
 export {asCollectionView} from "./asserts/asCollectionView";
 export {asNumber} from "./asserts/asNumber";
+export {asString} from "./asserts/asString";
+export {asInt} from "./asserts/asInt";
 
 //lang
 export {isFunction} from "./lang/is-function";
@@ -23,3 +25,5 @@ export {isObject} from "./lang/is-object";
 export {isDate} from "./lang/is-date";
 export {isArray} from "./lang/is-array";
 export {isString} from "./lang/is-string";
+export {isBoolean} from "./lang/is-boolean";
+export {isNumber} from "./lang/is-number";

@@ -25,6 +25,7 @@ export class Control {
    private _orgOuter: string;                  // host element's original outerHTML
     private _orgInner: string;                  // host element's original innerHTML
     private _listeners;                         // list of event listeners attached to this control
+	 _orgTag: string;                            // host element's original tag (if not DIV)
     /**
      * Initializes a new instance of a @see:Control and attaches it to a DOM element.
      *
@@ -44,13 +45,21 @@ export class Control {
         // save host and original content (to restore on dispose)
         this._orgOuter = host.outerHTML;
         this._orgInner = host.innerHTML;
-	console.log("host.outerHTML:"+host.outerHTML);
-	console.log("host.outerHTML:"+host.innerHTML);
+	//console.log("host.outerHTML:"+host.outerHTML);
+	//console.log("host.outerHTML:"+host.innerHTML);
          this._e = host;
         host[Control._DATA_KEY] = this;
 
     }
-
+  refresh(fullUpdate = true) {
+  console.log("===========control_refresh_called=============");
+       /* if (!this.isUpdating && this._toInv) {
+            clearTimeout(this._toInv);
+            this._toInv = null;
+            this._fullUpdate = false;
+        }*/
+        // derived classes should override this...
+    }
     /**
      * Gets the HTML template used to create instances of the control.
      *
@@ -67,13 +76,13 @@ export class Control {
 			var inherits = Object.create(p);
 			//this.controlTemplate;
 			// reflector.annotations(p.constructor);
-			console.log("inherits:"+JSON.stringify(inherits.controlTemplate));
-			console.log("Reflect.getPrototypeOf(p):"+JSON.stringify(Reflect.getPrototypeOf(p)));
-			console.log("Reflect.getPrototypeOf(p):"+JSON.stringify((p)));
-			console.log("Reflect.getPrototypeOf(p):"+JSON.stringify(Reflect.get(this,'name')));
+			//console.log("inherits:"+JSON.stringify(inherits.controlTemplate));
+			//console.log("Reflect.getPrototypeOf(p):"+JSON.stringify(Reflect.getPrototypeOf(p)));
+			//console.log("Reflect.getPrototypeOf(p):"+JSON.stringify((p)));
+			//console.log("Reflect.getPrototypeOf(p):"+JSON.stringify(Reflect.get(this,'name')));
 			//console.log("Reflect.getPrototypeOf(p):"+Reflect.getPrototypeOf(p).__proto__);
-			console.log("p.constructor:"+p.constructor);
-			console.log(Reflect.get(this, 'controlTemplate'));
+			//console.log("p.constructor:"+p.constructor);
+			//console.log(Reflect.get(this, 'controlTemplate'));
 					return "sdfsdfds";
         }
 
@@ -226,15 +235,15 @@ export class Control {
         for (let i = 0; i < c.length; i++) {
             const ctl = Control.getControl(c[i]);
             if (ctl && ctl != this && ctl.containsFocus()) {
-				console.log("returning_true_0");
+				//console.log("returning_true_0");
                 return true;
             }
         }
 
         // check for actual HTML containment
-        //return contains(this._e, <HTMLElement>document.activeElement);
-		console.log("returning_true_1");
-		return false;
+        return contains(this._e, <HTMLElement>document.activeElement);
+		//console.log("contains_focus_returning_false");
+		//return false;
     }
 	 /**
      * Gets the control that is hosted in a given DOM element.
@@ -275,4 +284,21 @@ export class Control {
                 this._listeners.push({ target: target, type: type, fn: fn, capture: capture });
             }
         }
+		
+		 removeEventListener(target?: EventTarget, type?: string, capture?: boolean) {
+        if (this._listeners) {
+            for (let i = 0; i < this._listeners.length; i++) {
+                const l = this._listeners[i];
+                if (target == null || target == l.target) {
+                    if (type == null || type == l.type) {
+                        if (capture == null || capture == l.capture) {
+                            l.target.removeEventListener(l.type, l.fn, l.capture);
+                            this._listeners.splice(i, 1);
+                            i--;
+                        }
+                    }
+                }
+            }
+        }
+    }
    }

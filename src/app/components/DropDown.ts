@@ -3,7 +3,9 @@ import {asBoolean} from "../core/util/asserts/asBoolean";
 import {CancelEventArgs} from "../eventArgs/CancelEventArgs";
 import {EventArgs} from "../eventArgs/EventArgs";
 import {Event} from "../event/Event"
+import {setSelectionRange} from "../core/common/global";
 //import {showPopup, hidePopup} from '../../core/popup'
+import {Key} from "../enum/Key";
 import {Control} from './Control';
 import {
    
@@ -79,6 +81,9 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
         // create drop-down element, update button display
         this._createDropDown();
 		 this._updateBtn();
+		  const kd = this._keydown.bind(this);
+        this.addEventListener(this.hostElement, 'keydown', kd);
+        this.addEventListener(this.dropDown, 'keydown', kd);
  this.addEventListener(
             this._tbx, 'input', () => {
                 this._setText(this.text, false);
@@ -105,7 +110,16 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
                 }
             );
         }
-
+		     // handle clicks on the drop-down button
+        this.addEventListener(this._btn, 'click', this._btnclick.bind(this));
+  // stop propagation of clicks on the drop-down element
+        // (since they are not children of the hostElement, which can confuse
+        // elements such as Bootstrap menus)
+        this.addEventListener(
+            this._dropDown, 'click', (e) => {
+                e.stopPropagation();
+            }
+        );
     //this.renderer.selectRootElement(this.input["nativeElement"]).focus();
    }
    /*
@@ -141,6 +155,7 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
      * determines how the control submits data when used in forms.
      */
     applyTemplate(classNames: string, template: string, parts: Object, namePart?: string): HTMLElement {
+	//console.log("apply_template_started");
         const host = this._e;
 
         // apply standard classes to host element
@@ -152,9 +167,9 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
         let tpl = null;
         if (template) {
             tpl = createElement(template);
-			console.log("appending_child");
+			
             tpl = host.appendChild(tpl);
-			console.log("appending_child_finished");
+			
         }
 
         // make sure the control can get the focus
@@ -171,7 +186,7 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
         if (parts) {
             for (let part in parts) {
                 const wjPart = parts[part];
-				console.log("wj-part:"+wjPart);
+				//console.log("wj-part:"+wjPart);
                 this[part]   = tpl.querySelector('[wj-part="' + wjPart + '"]');
 
                 // look in the root as well (querySelector doesn't...)
@@ -203,7 +218,7 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
                 }
             }
         }
-
+		//console.log("apply_template_finished");
         // return template
         return tpl;
     }
@@ -213,7 +228,7 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
     }
 	
 	   get inputElement(): HTMLInputElement {
-	   console.log("input_element");
+	  // console.log("input_element");
         return this._tbx;
     }
 
@@ -221,13 +236,13 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
      * Gets or sets the string shown as a hint when the control is empty.
      */
     get placeholder(): string {
-	console.log("place_holder");
+	//console.log("place_holder");
         return this._tbx.placeholder;
     }
 
     set placeholder(value: string) {
-	console.log("place_holder");
-        this._tbx.placeholder = value;
+	//console.log("place_holder");
+        this._tbx.placeholder = "ssss";
     }
 ////////////////////////////////////////////////////////////
 //
@@ -235,30 +250,42 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
 //
 /////////////////////////////////////////////////////////////
  get isDroppedDown(): boolean {
+		console.log("get_is_dropped_down:"+this._dropDown.style.display);
         return this._dropDown.style.display != 'none';
     }
 
     set isDroppedDown(value: boolean) {
-		console.log("is_dropped_down");
+		console.log("?????????????set_is_dropped_down??????????????");
+		console.log("received_value:"+value);
         value = asBoolean(value) && !this.disabled;
+		console.log("updated_received_value:"+value);
+		//console.log("this_is_dropped_down:"+this.isDroppedDown);
+		
+		
         if (value != this.isDroppedDown && this.onIsDroppedDownChanging(new CancelEventArgs())) {
-            const dd = this._dropDown;
+			//console.log("checkPost");
+            //const dd = this._dropDown;
+		const dd = this._dropDown;	
             if (value) {
                 if (!dd.style.minWidth) {
                     dd.style.minWidth = this.hostElement.getBoundingClientRect().width + 'px';
                 }
+				console.log("set_display_block");
                 dd.style.display = 'block';
                 this._updateDropDown();
             } else {
                 if (this.containsFocus()) {
                     if (!this.isTouching || !this.showDropDownButton) {
-                      //  this.selectAll();
+				//	console.log("show_select_all");
+                       this.selectAll();
                     }
                 }
+				console.log("==========HIDE_POPUP============");
+				   dd.style.display = 'none';
               //  hidePopup(dd);
             }
-            //this._updateFocusState();
-            //this.onIsDroppedDownChanged();
+          //  this._updateFocusState();
+            this.onIsDroppedDownChanged();
         }
     }
 	   /**
@@ -270,27 +297,30 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
      * Raises the @see:isDroppedDownChanging event.
      */
     onIsDroppedDownChanging(e: CancelEventArgs): boolean {
-		console.log("onIsDroppedDownChanging");
+		console.log("on_is_dropped_down_changing");
         this.isDroppedDownChanging.raise(this, e);
         return !e.cancel;
     }
 	
 	    // update drop down content before showing it
     _updateDropDown() {
-	console.log("_updateDropDown");
+	console.log("_updateDropDown=========????===============");
         if (this.isDroppedDown) {
-           // this._commitText();
+            this._commitText();
             //showPopup(this._dropDown, this.hostElement);
         }
     }
-	
+	 // commit the text in the value element
+    _commitText() {
+        // override in derived classes
+    }
 	    get showDropDownButton(): boolean {
-		console.log("_updateDropDown");
+		//console.log("_updateDropDown");
         return this._showBtn;
     }
 
     set showDropDownButton(value: boolean) {
-	console.log("_updateDropDown");
+	//console.log("_updateDropDown");
         this._showBtn = asBoolean(value);
         this._updateBtn();
     }
@@ -303,22 +333,24 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
 	  // update text in textbox
     _setText(text: string, fullMatch: boolean) {
 
-       console.log("yes");
+       console.log("drop_down_set_text_started");
 	    // make sure we have a string
         if (text == null) text = '';
         text = text.toString();
 
         // update element
         if (text != this._tbx.value) {
-		console.log("_setText:"+text);
+		//console.log("_setText:"+text);
             this._tbx.value = text;
         }
 
         // fire change event
         if (text != this._oldText) {
             this._oldText = text;
+		//	console.log("fire_on_text_changed");
             this.onTextChanged();
         }
+		  console.log("drop_down_set_text_finished");
     }
 	
 	  get text(): string {
@@ -344,14 +376,14 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
     }
 	
 	 _expandSelection() {
-		console.log("expand_selection_started");
+		//console.log("expand_selection_started");
         const tbx = this._tbx,
               val = tbx.value;
         let start = tbx.selectionStart,
               end = tbx.selectionEnd;
-			  console.log("val:>>"+val+"<<");
-			  console.log("start:"+start);
-			  console.log("end:"+end);
+			 // console.log("val:>>"+val+"<<");
+			//  console.log("start:"+start);
+			//  console.log("end:"+end);
         if (val && start == end) {
             const ct = this._getCharType(val, start);
             if (ct > -1) {
@@ -367,11 +399,11 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
                 }
                 if (start != end) {
 				console.log("set_selection_range");
-                   // tbx.setSelectionRange(start, end);
+                    tbx.setSelectionRange(start, end);
                 }
             }
         }
-		console.log("expand_selection_finished");
+		//console.log("expand_selection_finished");
     }
 	  // get the type of character (digit, letter, other) at a given position
     _getCharType(text: string, pos: number) {
@@ -381,5 +413,93 @@ export class DropDown extends Control /*implements AfterViewInit*/ {
         return -1;
     }
 
+
+get autoExpandSelection(): boolean {
+console.log("==============auto expand");
+        return this._autoExpand;
+    }
+
+    set autoExpandSelection(value: boolean) {
+	console.log("==============auto expand");
+        this._autoExpand = asBoolean(value);
+    }
+
+  get dropDown(): HTMLElement {
+        return this._dropDown;
+    }
+	
+	// handle keyboard events
+    _keydown(e: KeyboardEvent) {
+//console.log("pressed_key_down");
+        // honor defaultPrevented
+        if (e.defaultPrevented) return;
+
+        // handle key
+        switch (e.keyCode) {
+
+            // close dropdown on tab, escape, enter
+            case Key.Tab:
+            case Key.Escape:
+            case Key.Enter:
+                this.isDroppedDown = false;
+                break;
+
+            // toggle drop-down on F4, alt up/down
+            case Key.F4:
+            case Key.Down:
+            case Key.Up:
+                if (e.keyCode == Key.F4 || e.altKey) {
+                    this.isDroppedDown = !this.isDroppedDown;
+                    if (!this.isDroppedDown) {
+                        this._tbx.focus();
+                    }
+                    e.preventDefault();
+                }
+                break;
+        }
+    }
+	  // handle clicks on the drop-down button
+    _btnclick(e: MouseEvent) {
+		console.log("===========CLICKED_STARTED===============");
+		console.log("isDroppedDown_start:"+this.isDroppedDown);
+        this.isDroppedDown = !this.isDroppedDown;
+		console.log("isDroppedDown_finish:"+this.isDroppedDown);
+			console.log("===========CLICKED_FINISHED===============");
+    }
+	
+	  isDroppedDownChanged = new Event();
+
+    /**
+     * Raises the @see:isDroppedDownChanged event.
+     */
+    onIsDroppedDownChanged(e?: EventArgs) {
+        this.isDroppedDownChanged.raise(this, e);
+    }
+	  selectAll() {
+		console.log("select_all_started");
+		console.log("_elRef:"+this._elRef);
+		console.log("_tbx:"+this._tbx);
+        if (this._elRef == this._tbx) {
+			console.log("set_selection_range");
+            setSelectionRange(this._tbx, 0, this.text.length);
+        }
+		console.log("select_all_finished");
+    }
+	
+	 // reposition dropdown when refreshing
+    refresh(fullUpdate = true) {
+        super.refresh(fullUpdate);
+console.log("this.isDroppedDown:"+this.isDroppedDown);
+        // update popup/focus
+        if (this.isDroppedDown) {
+            if (getComputedStyle(this.hostElement).display != 'none') {
+                const ae = <HTMLElement>document.activeElement;
+               // showPopup(this._dropDown, this.hostElement);
+                if (ae instanceof HTMLElement && ae != document.activeElement) {
+                    ae.focus();
+                }
+            }
+        }
+    }
 
 }

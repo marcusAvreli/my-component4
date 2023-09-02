@@ -1,22 +1,23 @@
-//import {DateTime} from "../core/index";
+import {DateTime} from "../core/index";
 import {Event} from "../event/Event";
 import {EventArgs} from "../eventArgs/EventArgs";
 import {CancelEventArgs} from "../eventArgs/CancelEventArgs";
-import {assert,asArray,asBoolean,tryCast} from "../core/index";
+import {assert,asArray,asBoolean,asFunction,tryCast,asInt} from "../core/index";
 import {ObservableArray} from "./ObservableArray";
 //import {IEditableCollectionView} from "../collections/interface/IEditableCollectionView";
-//import {IPagedCollectionView} from "../collections/interface/IPagedCollectionView";
+import {IPagedCollectionView} from "../collections/interface/IPagedCollectionView";
 import {INotifyCollectionChanged} from "../collections/interface/INotifyCollectionChanged";
-/*import {IPredicate} from "../collections/interface/IPredicate";
+import {IPredicate} from "./interface/IPredicate";
+
 import {ICollectionView} from "../collections/interface/ICollectionView";
-*/
+
 import {GroupDescription} from "./GroupDescription";
 import {NotifyCollectionChangedEventArgs} from "./eventArgs/NotifyCollectionChangedEventArgs";
 /*import {PageChangingEventArgs} from "./eventArgs/PageChangingEventArgs";
 */
 import {SortDescription} from "./SortDescription";
-/*import {NotifyCollectionChangedAction} from "../enum/collections/NotifyCollectionChangedAction";
-import {CollectionViewGroup} from "./CollectionViewGroup";*/
+import {NotifyCollectionChangedAction} from "../enum/collections/NotifyCollectionChangedAction";
+/*import {CollectionViewGroup} from "./CollectionViewGroup";*/
 //import {EventEmitter} from "@angular/core";
 import {$$observable} from "rxjs/symbol/observable";
 import {Observable, Subscriber} from "rxjs/Rx";
@@ -56,7 +57,7 @@ import {EventEmitter} from "@angular/core";
  * </pre>
  * @deprecated
  */
-export class CollectionView extends Observable<any> /*implements IEditableCollectionView, IPagedCollectionView */{
+export class CollectionView /*extends Observable<any> */implements /*IEditableCollectionView,*/ IPagedCollectionView {
     _src: any[];
     _ncc: INotifyCollectionChanged;
     _view: any[];
@@ -65,7 +66,8 @@ export class CollectionView extends Observable<any> /*implements IEditableCollec
     //_fullGroups: CollectionViewGroup[];
     _digest: string;
     _idx           = -1;
-  //  _filter: IPredicate;
+    _filter: IPredicate;
+ 
     _srtDsc        = new ObservableArray();
     _grpDesc       = new ObservableArray();
     _newItem       = null;
@@ -87,7 +89,8 @@ export class CollectionView extends Observable<any> /*implements IEditableCollec
     _chgRemoved    = new ObservableArray();
     _chgEdited     = new ObservableArray();
     _srtCvt: Function;
-	 collectionChanged = new EventEmitter(true);
+	// collectionChanged = new EventEmitter(true);
+	collectionChanged = new Event();
 
     /**
      * Initializes a new instance of a @see:CollectionView.
@@ -96,10 +99,11 @@ export class CollectionView extends Observable<any> /*implements IEditableCollec
      * @see:CollectionView.
      */
     constructor(sourceCollection?: any) {
-super();
+//super();
         // check that sortDescriptions contains SortDescriptions
 		console.log("collection_view_build_start");
-        this._srtDsc.collectionChanged.subscribe(() => {
+        /*
+		this._srtDsc.collectionChanged.subscribe(() => {
             const arr = this._srtDsc;
             for (let i = 0; i < arr.length; i++) {
                 assert(arr[i] instanceof SortDescription, 'sortDescriptions array must contain SortDescription objects.');
@@ -119,6 +123,7 @@ super();
                 this.refresh();
             }
         });
+		*/
 		console.log("collection_view_build_finish:"+sourceCollection);
         // initialize the source collection
         this.sourceCollection = sourceCollection ? sourceCollection : new ObservableArray();
@@ -153,7 +158,7 @@ super();
      */
     refresh() {
 
-        console.log("refresh_called");
+        console.log("=========refresh_called==============");
 		 // not while updating, adding, or editing
         if (this._updating > 0 || this._newItem || this._edtItem) {
             return;
@@ -161,6 +166,9 @@ super();
 
         // perform the refresh
         this._performRefresh();
+		
+		 // notify listeners
+        this.onCollectionChanged();
     }
 	
     /**
@@ -179,21 +187,27 @@ super();
         return this.moveCurrentToPosition(this._pgView.indexOf(item));
     }
 	    moveCurrentToPosition(index: number): boolean {
-		
+		console.log("move_current_to_position:"+index);
+		console.log("pgView:"+this._pgView.length);
         if (index >= -1 && index < this._pgView.length) {
             const e = new CancelEventArgs();
+			console.log("here");
             if (this._idx != index && this.onCurrentChanging(e)) {
-
+console.log("here2");
                 // when moving away from current edit/new item, commit
                 if (this._edtItem && this._pgView[index] != this._edtItem) {
-                    this.commitEdit();
+				console.log("before_commit_edit");
+                   // this.commitEdit();
                 }
                 if (this._newItem && this._pgView[index] != this._newItem) {
-                    this.commitNew();
+				console.log("before_commit_new");
+                    //this.commitNew();
                 }
 
                 // update currency
+				console.log("move_current_to_position_1:"+index);
                 this._idx = index;
+				console.log("call_current_changed");
                 this.onCurrentChanged();
             }
         }
@@ -205,14 +219,15 @@ super();
 
         // benchmark
         //var start = new Date();
-
+console.log("============perform_refresh==============");
         // save current item
         const current = this.currentItem;
 
         // create filtered view
 		
 		this._view =  this._src; // don't waste time cloning
-		/*
+		// this._view = this._performFilter(this._src);
+		
         if (!this._src) {
             this._view = [];
         } else if (!this._filter || !this.canFilter) {
@@ -222,7 +237,7 @@ super();
         } else {
             this._view = this._performFilter(this._src);
         }
-*/
+
         // apply sort
 		/*
         if (this._srtDsc.length > 0 && this.canSort) {
@@ -261,7 +276,8 @@ super();
        // this._digest = this._getGroupsDigest(this.groups);
         // raise currentChanged if needed
         if (this.currentItem !== current) {
-           // this.onCurrentChanged();
+		console.log("++++++++++on_current_changed+++++++++");
+            this.onCurrentChanged();
         }
 
         //var now = new Date();
@@ -269,7 +285,9 @@ super();
     }
  // gets the list that corresponds to the current page
     _getPageView() {
-
+		//console.log("page_size:"+this.pageSize);
+		console.log("_pgIdx:"+this._pgIdx);
+		console.log("_pgIdx:"+this.pageSize);
         // not paging? return the whole view
        // if (this.pageSize <= 0 || this._pgIdx < 0) {
             return this._view;
@@ -309,8 +327,11 @@ super();
             // connect new source
             this._src = asArray(sourceCollection, false);
             this._ncc = <INotifyCollectionChanged>tryCast(this._src, 'INotifyCollectionChanged');
+			console.log("this._ncc:"+this._ncc);
             if (this._ncc) {
-                this._ncc.collectionChanged.subscribe(this._sourceChanged.bind(this));
+			console.log("********************* nc **********************");
+               // this._ncc.collectionChanged.subscribe(this._sourceChanged.bind(this));
+			   this._ncc.collectionChanged.addHandler(this._sourceChanged, this);
             }
 
             // clear any changes
@@ -319,11 +340,12 @@ super();
             // refresh view
             this.refresh();
   /*          this.moveCurrentToFirst();
-
+*/
             // if we have no items, notify listeners that the current index changed
             if (this.currentPosition < 0 && index > -1) {
+			console.log("call_current_changed");
                 this.onCurrentChanged();
-            }*/
+            }
         }
     }
 	 get currentPosition(): number {
@@ -345,10 +367,209 @@ super();
         return this._pgView;
     }
   // handle notifications from the source collection
-    private _sourceChanged(s: INotifyCollectionChanged, e: NotifyCollectionChangedEventArgs) {
-	console.log("source changed!!!!!!!!!!!!!!!!!!");
+   private _sourceChanged(s: INotifyCollectionChanged, e: NotifyCollectionChangedEventArgs) {
+		console.log("=================source_changed===================");
         if (this._updating <= 0) {
             this.refresh(); // TODO: optimize
         }
     }
+	 currentChanging = new EventEmitter();
+
+    /**
+     * Raises the @see:currentChanging event.
+     *
+     * @param e @see:CancelEventArgs that contains the event data.
+     */
+    onCurrentChanging(e: CancelEventArgs): boolean {
+	console.log("on_current_changing");
+        this.currentChanging.emit(e);
+        return !e.cancel;
+    }
+	
+	  /**
+     * Occurs after the current item changes.
+     */
+  //  currentChanged = new EventEmitter<any>();
+currentChanged = new Event();
+    /**
+     * Raises the @see:currentChanged event.
+     */
+    
+	onCurrentChanged(e?: EventArgs)  {
+		console.log("on_current_changed");
+        this.currentChanged.raise(this,e);
+    }
+	
+	//currentChanged(e :MouseEvent) {
+	//console.log("hello");
+       // this.currentChanged.emit(e);
+    //}
+	 _performFilter(items: any[]): any[] {
+        console.log("=============PERFORM FILTER================");
+		console.log("this.canFilter:"+this.canFilter);
+		   return this.canFilter && this._filter
+            ? items.filter(this._filter, this)
+            : items;
+           // return items;
+    }
+	 // ** ICollectionView
+
+    /**
+     * Gets a value that indicates whether this view supports filtering via the
+     * @see:filter property.
+     */
+    get canFilter(): boolean {
+        return this._canFilter;
+    }
+
+    set canFilter(value: boolean) {
+        this._canFilter = asBoolean(value);
+    }
+	
+	onCollectionChanged(e = NotifyCollectionChangedEventArgs.reset) {
+    //    this.collectionChanged.emit(e);
+	    this.collectionChanged.raise(this,e);
+    }
+	   /**
+     * Sets the first item in the view as the current item.
+     */
+    moveCurrentToFirst(): boolean {
+        return this.moveCurrentToPosition(0);
+    }
+
+    /**
+     * Sets the last item in the view as the current item.
+     */
+    moveCurrentToLast(): boolean {
+        return this.moveCurrentToPosition(this._pgView.length - 1);
+    }
+	 /**
+     * Ends the current edit transaction and saves the pending changes.
+     */
+    commitEdit() {
+        const item = this._edtItem;
+        if (item != null) {
+
+            // check if anything really changed
+            let sameContent = this._sameContent(item, this._edtClone);
+
+            // clean up state
+            this._edtItem  = null;
+            this._edtClone = null;
+
+            // refresh to update the edited item
+            const index = this._pgView.indexOf(item);
+            const digest = this._digest;
+            this._performRefresh();
+
+            // track changes (before notifying)
+            if (this._trackChanges == true && !sameContent) {
+                this._trackItemChanged(item);
+            }
+
+            // notify (single item change or full refresh)
+            if (this._pgView.indexOf(item) == index && digest == this._digest) {
+                this._raiseCollectionChanged(NotifyCollectionChangedAction.Change, item, index);
+            } else {
+                this._raiseCollectionChanged(); // full refresh
+            }
+        }
+    }
+  // checks whether two objects have the same content
+    _sameContent(dst: any, src: any) {
+        for (var key in src) {
+            if (!this._sameValue(dst[key], src[key])) {
+                return false;
+            }
+        }
+        for (var key in dst) {
+            if (!this._sameValue(dst[key], src[key])) {
+                return false;
+            }
+        }
+        return true;
+    }
+	
+	  /**
+     * Track changes applied to an item (not necessarily the current edit item).
+     *
+     * @param item Item that has been changed.
+     */
+    _trackItemChanged(item: any) {
+        if (this._trackChanges) {
+            let idx = this._chgEdited.indexOf(item);
+            if (idx < 0 && this._chgAdded.indexOf(item) < 0) { // add item to changed list
+                this._chgEdited.push(item);
+            } else if (idx > -1) { // item already on changed list, notify of change
+               // var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Change, item, idx);
+			    var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Change, idx);
+                this._chgEdited.onCollectionChanged(e);
+            } else { // item on added list, notify of change
+                idx = this._chgAdded.indexOf(item);
+                if (idx > -1) {
+                    //var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Change, item, idx);
+					var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Change,  idx);
+                    this._chgAdded.onCollectionChanged(e);
+                }
+            }
+        }
+    }
+	
+	 // creates event args and calls onCollectionChanged
+    private _raiseCollectionChanged(action = NotifyCollectionChangedAction.Reset, item?: any, index?: number) {
+        //console.log('** collection changed: ' + NotifyCollectionChangedAction[action] + ' **');
+       // const e = new NotifyCollectionChangedEventArgs(action, item, index);
+	    const e = new NotifyCollectionChangedEventArgs(action,  index);
+        this.onCollectionChanged(e);
+    }
+	
+	
+    // checks whether two values are the same
+    _sameValue(v1: any, v2: any) {
+        return v1 == v2 || DateTime.equals(v1, v2);
+    }
+	 /**
+     * Suspend refreshes until the next call to @see:endUpdate.
+     */
+    beginUpdate() {
+        this._updating++;
+    }
+
+    /**
+     * Resume refreshes suspended by a call to @see:beginUpdate.
+     */
+    endUpdate() {
+        this._updating--;
+        if (this._updating <= 0) {
+            this.refresh();
+        }
+    }
+	
+	//////////////////////////////////////
+	//////  after items selectable 
+	///////////////////
+	 get filter(): IPredicate {
+        return this._filter;
+    }
+
+    set filter(value: IPredicate) {
+		console.log("=============value======================:"+value);
+        if (this._filter != value) {
+            this._filter = <IPredicate>asFunction(value);
+            if (this.canFilter) {
+                this.refresh();
+            }
+        }
+		
+    }
+get pageSize(): number {
+        return this._pgSz;
+    }
+
+    set pageSize(value: number) {
+        if (value != this._pgSz) {
+            this._pgSz = asInt(value);
+            this.refresh();
+        }
+    }	  
 }

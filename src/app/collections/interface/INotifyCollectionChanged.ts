@@ -8,5 +8,6 @@ export interface INotifyCollectionChanged {
     /**
      * Occurs when the collection changes.
      */
-    collectionChanged: EventEmitter<any>;
+    //collectionChanged: EventEmitter<any>;
+	collectionChanged : Event;
 }

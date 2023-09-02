@@ -1,8 +1,9 @@
 import {INotifyCollectionChanged} from "./INotifyCollectionChanged";
 //import {IQueryInterface} from "../../core/index";
-//import {IPredicate} from "./IPredicate";
+import {IPredicate} from "./IPredicate";
 import {ObservableArray} from "../ObservableArray";
 import {EventEmitter} from "@angular/core";
+import {Event} from "../../event/Event";
 /**
  * Enables collections to have the functionalities of current record management,
  * custom sorting, filtering, and grouping.
@@ -21,7 +22,7 @@ export interface ICollectionView extends INotifyCollectionChanged/*, IQueryInter
      * Gets a value that indicates whether this view supports filtering via the
      * @see:filter property.
      */
-    //canFilter: boolean;
+    canFilter: boolean;
     /**
      * Gets a value that indicates whether this view supports grouping via the
      * @see:groupDescriptions property.
@@ -35,7 +36,7 @@ export interface ICollectionView extends INotifyCollectionChanged/*, IQueryInter
     /**
      * Gets the current item in the view.
      */
-   // currentItem: any;
+    currentItem: any;
     /**
      * Gets the ordinal position of the current item in the view.
      */
@@ -51,7 +52,7 @@ export interface ICollectionView extends INotifyCollectionChanged/*, IQueryInter
      *   collectionView.filter = this._filter.bind(this);
      * </pre>
      */
-   // filter: IPredicate;
+    filter: IPredicate;
     /**
      * Gets a collection of @see:GroupDescription objects that describe how the
      * items in the collection are grouped in the view.
@@ -85,15 +86,15 @@ export interface ICollectionView extends INotifyCollectionChanged/*, IQueryInter
      *
      * @param item The item to set as the @see:currentItem.
      */
-  //  moveCurrentTo(item: any): boolean;
+    moveCurrentTo(item: any): boolean;
     /**
      * Sets the first item in the view as the current item.
      */
-   // moveCurrentToFirst(): boolean;
+    moveCurrentToFirst(): boolean;
     /**
      * Sets the last item in the view as the current item.
      */
-  //  moveCurrentToLast(): boolean;
+    moveCurrentToLast(): boolean;
     /**
      * Sets the item after the current item in the view as the current item.
      */
@@ -111,11 +112,13 @@ export interface ICollectionView extends INotifyCollectionChanged/*, IQueryInter
     /**
      * Re-creates the view using the current sort, filter, and group parameters.
      */
-    // refresh();
+    refresh();
     /**
      * Occurs after the current item changes.
      */
    // currentChanged: EventEmitter<any>;
+   //currentChanged (e: MouseEvent);
+   currentChanged :Event;
     /**
      * Occurs before the current item changes.
      */
@@ -126,11 +129,11 @@ export interface ICollectionView extends INotifyCollectionChanged/*, IQueryInter
     /**
      * Suspends refreshes until the next call to @see:endUpdate.
      */
-   // beginUpdate();
+    beginUpdate();
     /**
      * Resumes refreshes suspended by a call to @see:beginUpdate.
      */
-   // endUpdate();
+    endUpdate();
     /**
      * Executes a function within a beginUpdate/endUpdate block.
      *

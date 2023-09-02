@@ -19,9 +19,10 @@ export class NotifyCollectionChangedEventArgs extends EventArgs {
      * @param added Item that was added.
      */
     constructor(public action: NotifyCollectionChangedAction,
-                public index = -1,
+                public index = -1
+				/*,
                 public removed: any[] = [],
-                public added: any[] = []) {
+                public added: any[] = []*/) {
         super();
     }
 }

@@ -2,6 +2,7 @@ import {ArrayBase} from "./ArrayBase";
 import {INotifyCollectionChanged} from "../collections/interface/INotifyCollectionChanged";
 import {NotifyCollectionChangedAction} from "../enum/collections/NotifyCollectionChangedAction";
 import {asArray} from "../core/index";
+import {Event} from "../event/Event";
 import {EventEmitter} from "@angular/core";
 import {NotifyCollectionChangedEventArgs} from "./eventArgs/NotifyCollectionChangedEventArgs";
 
@@ -24,7 +25,7 @@ export class ObservableArray extends ArrayBase implements INotifyCollectionChang
      */
     push(item: any): number {
         const rv = super.push(item);
-        this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, rv - 1, [], [item]));
+        this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, rv - 1/*, [], [item]*/));
         return rv;
     }
 
@@ -35,7 +36,7 @@ export class ObservableArray extends ArrayBase implements INotifyCollectionChang
      */
     pop(): any {
         const item = super.pop();
-        this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, this.length, [item]));
+        this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, this.length/*, [item]*/));
         return item;
     }
 
@@ -52,17 +53,17 @@ export class ObservableArray extends ArrayBase implements INotifyCollectionChang
         if (count && items.length > 0) {
             removed = super.splice(index, count, items);
             if(count == items.length) {
-                this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Change, index, removed, items));
+                this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Change, index/*, removed, items*/));
             }
-            this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Splice, index, removed, items));
+            this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Splice, index/*, removed, items*/));
             return removed;
         } else if (items.length > 0) {
             removed = super.splice(index, count, items);
-            this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, index, [], items));
+            this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, index/*, [], items*/));
             return removed;
         }else {
             removed = super.splice(index, count);
-            this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, index, removed, []));
+            this.onCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, index/*, removed, []*/));
             return removed;
         }
     }
@@ -170,7 +171,8 @@ export class ObservableArray extends ArrayBase implements INotifyCollectionChang
      * Occurs when the collection changes.
      * fixed
      */
-    collectionChanged = new EventEmitter(true);
+//    collectionChanged = new EventEmitter(true);
+	collectionChanged = new Event();
 
     /**
      * Raises the {@link collectionChanged} event.
@@ -178,6 +180,8 @@ export class ObservableArray extends ArrayBase implements INotifyCollectionChang
      * @param e Contains a description of the change.
      */
     onCollectionChanged(e = NotifyCollectionChangedEventArgs.reset) {
-        this.collectionChanged.emit(e);
+        //this.collectionChanged.emit(e);
+		 this.collectionChanged.raise(this,e);
+		
     }
 }
