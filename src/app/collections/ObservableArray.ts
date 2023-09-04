@@ -1,3 +1,4 @@
+//ObservableArray.ts
 import {ArrayBase} from "./ArrayBase";
 import {INotifyCollectionChanged} from "../collections/interface/INotifyCollectionChanged";
 import {NotifyCollectionChangedAction} from "../enum/collections/NotifyCollectionChangedAction";

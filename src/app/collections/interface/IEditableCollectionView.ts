@@ -1,3 +1,5 @@
+//IEditableCollectionView.ts
+//https://github.com/wahello/wigfrid
 import {ICollectionView} from "./ICollectionView";
 /**
  * Defines methods and properties that extend @see:ICollectionView to provide

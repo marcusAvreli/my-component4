@@ -1,3 +1,5 @@
+//INotifyCollectionChanged.ts
+//https://github.com/wahello/wigfrid
 import {Event} from "../../event/Event";
 import {EventEmitter} from "@angular/core";
 /**

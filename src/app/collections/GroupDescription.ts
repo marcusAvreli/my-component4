@@ -1,3 +1,4 @@
+//GroupDescription.ts
 /**
  * Represents a base class for types defining grouping conditions.
  *

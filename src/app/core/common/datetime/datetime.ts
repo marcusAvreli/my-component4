@@ -1,4 +1,5 @@
-import {isArray, isDate} from "../../util/util";
+import {isArray} from "../..//util/lang/is-array";
+import {isDate} from "../../util/lang/is-date";
 import {culture} from "../../globalization/Localization";
 /**
  * Provides date and time utilities.

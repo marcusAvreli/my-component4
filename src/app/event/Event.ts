@@ -1,5 +1,5 @@
 
-import {asFunction} from "../core/index";
+import {asFunction} from "../core/util/asserts/asFunction";
 import {EventHandler} from "./EventHandler";
 import {IEventHandler} from "./IEventHandler";
 import {EventArgs} from "../eventArgs/EventArgs";

@@ -1,15 +1,24 @@
-import {DateTime} from "../core/index";
+//CollectionView.ts
 import {Event} from "../event/Event";
 import {EventArgs} from "../eventArgs/EventArgs";
 import {CancelEventArgs} from "../eventArgs/CancelEventArgs";
-import {assert,asArray,asBoolean,asFunction,tryCast,asInt} from "../core/index";
+import {DateTime} from "../core/common/datetime/datetime";
+
+import {tryCast} from "../core/common/global";
+import {asInt} from "../core/util/asserts/asInt";
+import {asBoolean} from "../core/util/asserts/asBoolean";
+import {asArray} from "../core/util/asserts/asArray";
+import {assert} from "../core/util/asserts/assert";
+import {asFunction} from "../core/util/asserts/asFunction";
+
+
 import {ObservableArray} from "./ObservableArray";
 //import {IEditableCollectionView} from "../collections/interface/IEditableCollectionView";
 import {IPagedCollectionView} from "../collections/interface/IPagedCollectionView";
 import {INotifyCollectionChanged} from "../collections/interface/INotifyCollectionChanged";
 import {IPredicate} from "./interface/IPredicate";
 
-import {ICollectionView} from "../collections/interface/ICollectionView";
+//import {ICollectionView} from "../collections/interface/ICollectionView";
 
 import {GroupDescription} from "./GroupDescription";
 import {NotifyCollectionChangedEventArgs} from "./eventArgs/NotifyCollectionChangedEventArgs";

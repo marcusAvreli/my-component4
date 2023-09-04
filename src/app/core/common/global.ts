@@ -1,7 +1,7 @@
 //import {Binding} from "./Binding";
 //import {Rectangle} from "./ui/Rectangle";
 //import {isFunction, isString,     } from "../util/util";
-import {isFunction, isString, asType, contains, asNumber, isBoolean, isNumber} from "../util/util";
+import {isFunction, isString, asType, contains, asNumber, isBoolean, isNumber} from "../util/lang";
 //import {Aggregate} from "../../../enum/Aggregate";
 import {ICollectionView} from "../../collections/interface/ICollectionView";
 

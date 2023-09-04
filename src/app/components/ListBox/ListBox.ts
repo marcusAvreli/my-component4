@@ -657,7 +657,7 @@ loadingItems = new Event();
 		const cb = this._getCheckbox(index);
 		return cb ? cb.checked : false;
 	}
-		setItemChecked(index: number, checked: boolean) {
+	setItemChecked(index: number, checked: boolean) {
 		this._setItemChecked(index, checked, true);
 	}
 	// sets the checked state of an item on the list

@@ -1,3 +1,5 @@
+//ICollectionView.ts
+//https://github.com/wahello/wigfrid
 import {INotifyCollectionChanged} from "./INotifyCollectionChanged";
 //import {IQueryInterface} from "../../core/index";
 import {IPredicate} from "./IPredicate";

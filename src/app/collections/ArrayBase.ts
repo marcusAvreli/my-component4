@@ -1,4 +1,4 @@
-
+//ArrayBase
 
 /**
  * Base class for Array classes with notifications.
